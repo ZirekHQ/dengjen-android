@@ -54,19 +54,18 @@ android {
     testOptions { unitTests.isReturnDefaultValues = true }
 }
 
-// Checked when a release task runs, not at configuration, so Gradle sync and other tasks still work.
-// Play rejects an unsigned bundle, so bundleRelease always needs the key; assembleRelease may stay
-// unsigned for F-Droid, but a half-set key fails here with a clear message.
-tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" }.configureEach {
-    val missing = missingSigningVars
-    val unsignedBundle = name == "bundleRelease" && releaseKeystore == null
-    doFirst {
-        if (missing.isNotEmpty()) {
-            throw GradleException("DENGJEN_KEYSTORE is set but ${missing.joinToString()} not; see RELEASING.md")
-        }
-        if (unsignedBundle) {
-            throw GradleException("bundleRelease needs DENGJEN_KEYSTORE and the key variables; see RELEASING.md")
-        }
+// Checked once the task graph is known and before any task runs, so nothing gets packaged or signed
+// first, and Gradle sync (which schedules no release task) still works. Play rejects an unsigned
+// bundle, so bundleRelease always needs the key; assembleRelease may stay unsigned for F-Droid, but a
+// half-set key fails here with a clear message.
+gradle.taskGraph.whenReady {
+    val bundling = hasTask("${project.path}:bundleRelease")
+    val releasing = bundling || hasTask("${project.path}:assembleRelease")
+    if (releasing && missingSigningVars.isNotEmpty()) {
+        throw GradleException("DENGJEN_KEYSTORE is set, but these are missing: ${missingSigningVars.joinToString()}; see RELEASING.md")
+    }
+    if (bundling && releaseKeystore == null) {
+        throw GradleException("bundleRelease needs DENGJEN_KEYSTORE and the key variables; see RELEASING.md")
     }
 }
 
