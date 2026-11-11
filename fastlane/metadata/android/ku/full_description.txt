@@ -1,0 +1,14 @@
+Dengjen motoreke nivîs-bo-axaftinê ye ji bo kurdiya kurmancî. Ew kurmancî li nivîs-bo-axaftina pergala Androidê zêde dike, ji ber vê yekê TalkBack, Select to Speak, xwînerên pirtûkên elektronîk û her sepaneke din a ku nivîsê dixwîne dikare kurmancî bi deng bixwîne.
+
+Axaftin bi dengên neural li ser telefona te tê çêkirin. Sepan înternetê tenê ji bo daxistina dengekî bi kar tîne; piştî wê bê înternet dixebite û tiştekî naşîne cihekî.
+
+<b>Destpêk</b>
+<ol>
+<li>Dengjenê veke û dengekî kurmancî daxe.</li>
+<li>Li ser "Mîhengên nivîs-bo-axaftinê veke" bitikîne, Dengjenê wek motora bijartî hilbijêre û zimên bike kurdî.</li>
+<li>Êdî TalkBack bi Dengjenê kurmancî dixwîne.</li>
+</ol>
+
+Hemû rûpel bi TalkBackê re dixebitin.
+
+Dengjen nermalava azad e di bin GNU GPL guhertoya 3 an paşê de, ji aliyê dilxwazên ZirekHQ ve hatiye çêkirin. Koda çavkaniyê: https://github.com/ZirekHQ/dengjen-android
