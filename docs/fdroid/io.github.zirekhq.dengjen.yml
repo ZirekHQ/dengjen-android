@@ -22,7 +22,7 @@ Builds:
       - apt-get update
       - apt-get install -y cmake ninja-build
     srclibs:
-      - dengjen@v3.1.0
+      - dengjen@v3.2.0
       - rustup@1.28.2
     ndk: r27c
     prebuild:
@@ -33,9 +33,8 @@ Builds:
     build:
       - source $HOME/.cargo/env
       - export ANDROID_NDK_HOME=$$NDK$$ ANDROID_HOME=$$SDK$$
-      # TODO: build-ort.sh (ONNX Runtime from source) and DENGJEN_ANDROID_STT=0 (skip the STT
-      # module and its prebuilt sherpa-onnx library) come with ZirekHQ/dengjen#588. Move the
-      # dengjen srclib to the first release that has them before submitting.
+      # ONNX Runtime from source in place of the sherpa-onnx prebuilt, and no STT module, which
+      # links a prebuilt sherpa-onnx library.
       - $$dengjen$$/bindings/android/scripts/build-ort.sh
       - DENGJEN_ANDROID_STT=0 $$dengjen$$/bindings/android/scripts/build-jni.sh release
       - (cd $$dengjen$$/bindings/android && ./gradlew :core:assembleRelease :tts:assembleRelease)

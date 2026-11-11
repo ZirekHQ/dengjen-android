@@ -1,6 +1,6 @@
 # The ZirekHQ/dengjen release whose Android AARs the app is built on.
 # scripts/fetch-aars.sh downloads them into libs/ and checks these digests
 # (copied from that release's SHA256SUMS-android.txt).
-version=3.1.0
+version=3.2.0
 core=d70dc866f9a4870507c8d0d4ad94a127745d5139f346bb57052f7772ae06e09c
-tts=dc8551be045564f34cb557eaedad71fa1d8f05e24ea8263f6f9ae7f1845abdac
+tts=de457fafbad6b27a35efe188231b08c2645cca84e767975d86222e85a43951ed
