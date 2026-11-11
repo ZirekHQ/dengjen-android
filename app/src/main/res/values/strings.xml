@@ -7,7 +7,10 @@
     <string name="voices_heading">Kurmanji voices</string>
     <string name="status_loading">Loading the voice list…</string>
     <string name="status_offline">Could not load the voice list. Check the connection and try again.</string>
-    <string name="status_ready">%1$d voices available, %2$d installed.</string>
+    <plurals name="status_ready">
+        <item quantity="one">%1$d voice available, %2$d installed.</item>
+        <item quantity="other">%1$d voices available, %2$d installed.</item>
+    </plurals>
     <string name="retry">Try again</string>
     <string name="voice_detail">%1$s quality, %2$s</string>
     <string name="voice_installed">Installed</string>

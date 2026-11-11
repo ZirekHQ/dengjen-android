@@ -6,7 +6,10 @@
     <string name="voices_heading">Dengên kurmancî</string>
     <string name="status_loading">Lîsteya dengan tê barkirin…</string>
     <string name="status_offline">Lîsteya dengan nehat barkirin. Girêdanê kontrol bike û dîsa biceribîne.</string>
-    <string name="status_ready">%1$d deng hene, %2$d sazkirî ne.</string>
+    <plurals name="status_ready">
+        <item quantity="one">%1$d deng heye, %2$d sazkirî ne.</item>
+        <item quantity="other">%1$d deng hene, %2$d sazkirî ne.</item>
+    </plurals>
     <string name="retry">Dîsa biceribîne</string>
     <string name="voice_detail">Kalîteya %1$s, %2$s</string>
     <string name="voice_installed">Sazkirî</string>

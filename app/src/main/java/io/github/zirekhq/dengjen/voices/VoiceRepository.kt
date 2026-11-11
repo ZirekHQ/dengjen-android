@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
@@ -69,10 +70,15 @@ class VoiceRepository private constructor(context: Context) {
             if (catalogue == null) catalogue = readCache()
             val fresh = try {
                 val text = HttpTransport().open(Catalogue.URL, 0).use { it.body.readBytesLimited(Catalogue.MAX_BYTES) }
-                Catalogue.parse(text).also { writeCache(text) }
+                Catalogue.parse(text).also {
+                    logSkipped(it)
+                    writeCache(text)
+                }
             } catch (e: IOException) {
+                Log.w(TAG, "could not fetch the voice catalogue", e)
                 null
             } catch (e: CatalogueException) {
+                Log.w(TAG, "rejected the voice catalogue: ${e.message}")
                 null
             }
             if (fresh != null) catalogue = fresh
@@ -135,6 +141,10 @@ class VoiceRepository private constructor(context: Context) {
         main.post { notifyListeners() }
     }
 
+    private fun logSkipped(catalogue: Catalogue) {
+        catalogue.skipped.forEach { (key, reason) -> Log.i(TAG, "skipped catalogue voice $key: $reason") }
+    }
+
     private fun notifyListeners() {
         listeners.toList().forEach { it() }
     }
@@ -163,6 +173,7 @@ class VoiceRepository private constructor(context: Context) {
         const val LANGUAGE = "ku"
         private const val PREFS = "voices"
         private const val KEY_DEFAULT = "default_voice"
+        private const val TAG = "DengjenVoices"
 
         @Volatile
         private var instance: VoiceRepository? = null

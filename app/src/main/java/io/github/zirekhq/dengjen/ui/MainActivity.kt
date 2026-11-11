@@ -83,7 +83,7 @@ class MainActivity : Activity() {
         val text = when {
             loading && voices.isEmpty() -> getString(R.string.status_loading)
             loadFailed && voices.isEmpty() -> getString(R.string.status_offline)
-            else -> getString(R.string.status_ready, voices.size, voices.count { it.key in installed })
+            else -> resources.getQuantityString(R.plurals.status_ready, voices.size, voices.size, voices.count { it.key in installed })
         }
         if (status.text.toString() != text) status.text = text
         // Rows are rebuilt only when the voice list changes; progress updates edit them in place so
@@ -102,7 +102,7 @@ class MainActivity : Activity() {
     }
 
     private fun bind(view: View, voice: CatalogueVoice, installed: Boolean, isDefault: Boolean) {
-        val label = voice.name.replaceFirstChar { it.uppercase() }
+        val label = voice.displayName
         view.findViewById<TextView>(R.id.voice_name).setIfChanged(label)
         view.findViewById<TextView>(R.id.voice_detail).setIfChanged(
             getString(R.string.voice_detail, voice.quality, Formatter.formatShortFileSize(this, voice.totalBytes)),
