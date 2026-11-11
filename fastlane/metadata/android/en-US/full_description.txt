@@ -1,6 +1,6 @@
 Dengjen is a text-to-speech engine for Kurmanji Kurdish. It adds Kurmanji to Android's system text-to-speech, so TalkBack, Select to Speak, e-book readers and any other app that speaks text can read Kurmanji aloud.
 
-Speech is made on your phone with neural voices. The app uses the internet only to download a voice; after that it works offline and sends nothing anywhere.
+Speech is made on your phone with neural voices. The app uses the internet only for the voice list, which it refreshes when you open it, and for voice downloads. Speaking works offline, and the text you hear is never sent anywhere.
 
 <b>Getting started</b>
 <ol>

@@ -42,10 +42,10 @@ With Play App Signing, Google holds the app signing key and this is only the upl
 
 1. Create the Play developer account and the app `io.github.zirekhq.dengjen` (free, all countries).
 2. Upload the first bundle by hand to the internal track; Play accepts API uploads only after that. Build it with the release workflow (the `bundle` artifact) or locally with the secrets above as environment variables (`DENGJEN_KEYSTORE` is the path to the `.jks`).
-3. Store listing: use the text in `fastlane/metadata/android/en-US/` and add the Kurmanji translation from `ku/`. The privacy policy URL is `https://github.com/ZirekHQ/dengjen-android/blob/main/PRIVACY.md`.
+3. Store listing: use the text in `fastlane/metadata/android/en-US/`. Play offers no Kurdish store-listing language, so the `ku/` text is for F-Droid; on Play, add its first paragraph under the English description if you want Kurmanji readers to see it. The privacy policy URL is `https://github.com/ZirekHQ/dengjen-android/blob/main/PRIVACY.md`.
 4. App content: no ads; data safety "no data collected or shared" (speech stays on the device, the voice download sends nothing but the request); target audience 13+. The app does not use the AccessibilityService API, so no accessibility declaration is needed.
 5. In Google Cloud, create a service account, give it access to the app in the Play Console (Users and permissions, release to testing tracks), create a JSON key and save it as the `PLAY_SERVICE_ACCOUNT_JSON` secret of a `google-play` environment in this repository.
 
 The voices are not in the bundle: the app downloads them on first run, so the bundle stays far under Play's size limit.
 
-The APK from GitHub and F-Droid's APK are signed with different keys from the Play build, so switching between them needs an uninstall.
+The APK from GitHub and F-Droid's APK are signed with different keys from the Play build, so switching between them means uninstalling the app first.

@@ -1,6 +1,6 @@
 Dengjen motoreke nivîs-bo-axaftinê ye ji bo kurdiya kurmancî. Ew kurmancî li nivîs-bo-axaftina pergala Androidê zêde dike, ji ber vê yekê TalkBack, Select to Speak, xwînerên pirtûkên elektronîk û her sepaneke din a ku nivîsê dixwîne dikare kurmancî bi deng bixwîne.
 
-Axaftin bi dengên neural li ser telefona te tê çêkirin. Sepan înternetê tenê ji bo daxistina dengekî bi kar tîne; piştî wê bê înternet dixebite û tiştekî naşîne cihekî.
+Axaftin bi dengên neural li ser telefona te tê çêkirin. Sepan înternetê tenê ji bo lîsteya dengan, ku dema tu wê vedikî nû dike, û ji bo daxistina dengan bi kar tîne. Axaftin bê înternet dixebite, û nivîsa ku tu dibihîzî qet naşîne cihekî.
 
 <b>Destpêk</b>
 <ol>

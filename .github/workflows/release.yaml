@@ -13,9 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
-      contents: write
-      id-token: write
-      attestations: write
+      contents: write # gh release create
+      id-token: write # build provenance attestation
+      attestations: write # build provenance attestation
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -46,13 +46,16 @@ jobs:
             exit 1
           fi
           echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload.jks"
-          echo "DENGJEN_KEYSTORE=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
       - name: Build the signed APK and bundle
         env:
+          DENGJEN_KEYSTORE: ${{ runner.temp }}/upload.jks
           DENGJEN_KEYSTORE_PASSWORD: ${{ secrets.DENGJEN_KEYSTORE_PASSWORD }}
           DENGJEN_KEY_ALIAS: ${{ secrets.DENGJEN_KEY_ALIAS }}
           DENGJEN_KEY_PASSWORD: ${{ secrets.DENGJEN_KEY_PASSWORD }}
         run: ./gradlew --console=plain testReleaseUnitTest assembleRelease bundleRelease
+      - name: Delete the keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload.jks"
       - name: Name the outputs after the version and checksum them
         env:
           TAG: ${{ github.ref_name }}

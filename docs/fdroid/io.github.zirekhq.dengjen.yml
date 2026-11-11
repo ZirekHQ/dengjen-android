@@ -20,7 +20,7 @@ Builds:
     subdir: app
     sudo:
       - apt-get update
-      - apt-get install -y cmake
+      - apt-get install -y cmake ninja-build
     srclibs:
       - dengjen@v3.1.0
       - rustup@1.28.2
@@ -32,11 +32,12 @@ Builds:
       - cargo install cargo-ndk --locked
     build:
       - source $HOME/.cargo/env
-      - export ANDROID_NDK_HOME=$$NDK$$
-      # TODO: fetch-ort.sh downloads a prebuilt libonnxruntime.so, which F-Droid's scanner rejects.
-      # Replace it with an ONNX Runtime build from source before submitting.
-      - $$dengjen$$/bindings/android/scripts/fetch-ort.sh
-      - $$dengjen$$/bindings/android/scripts/build-jni.sh release
+      - export ANDROID_NDK_HOME=$$NDK$$ ANDROID_HOME=$$SDK$$
+      # TODO: build-ort.sh (ONNX Runtime from source) and DENGJEN_ANDROID_STT=0 (skip the STT
+      # module and its prebuilt sherpa-onnx library) come with ZirekHQ/dengjen#588. Move the
+      # dengjen srclib to the first release that has them before submitting.
+      - $$dengjen$$/bindings/android/scripts/build-ort.sh
+      - DENGJEN_ANDROID_STT=0 $$dengjen$$/bindings/android/scripts/build-jni.sh release
       - (cd $$dengjen$$/bindings/android && ./gradlew :core:assembleRelease :tts:assembleRelease)
       - mkdir -p ../libs
       - cp $$dengjen$$/bindings/android/core/build/outputs/aar/core-release.aar ../libs/dengjen-android-core.aar
@@ -44,7 +45,9 @@ Builds:
     gradle:
       - yes
 
-AutoUpdateMode: Version
+# Off, because a new app tag may need a new dengjen srclib (dengjen.lock), which an automatic
+# update would not change. Add each build entry by hand with the matching srclib.
+AutoUpdateMode: None
 UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
 CurrentVersion: 0.1.0
 CurrentVersionCode: 1
