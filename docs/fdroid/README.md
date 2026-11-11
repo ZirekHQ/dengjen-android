@@ -4,7 +4,7 @@ F-Droid builds every app from source on its own servers, including native librar
 
 ## Still open before submitting
 
-- **ONNX Runtime.** Done: the recipe runs dengjen's `bindings/android/scripts/build-ort.sh`, which builds `libonnxruntime.so` from the source pinned in `ort-source.lock`, in place of the sherpa-onnx prebuilt that `fetch-ort.sh` downloads. `DENGJEN_ANDROID_STT=0` leaves out the STT module, which links a prebuilt sherpa-onnx library. Run `fdroid build` with the scanner to confirm nothing prebuilt is left.
+- **ONNX Runtime.** Done: the recipe runs dengjen's `bindings/android/scripts/build-ort.sh`, which builds `libonnxruntime.so` from the source pinned in `ort-source.lock`, in place of the sherpa-onnx prebuilt that `fetch-ort.sh` downloads. `DENGJEN_ANDROID_STT=0` leaves out the STT module, which links a prebuilt sherpa-onnx library. The F-Droid scanner runs before the build commands, so it does not see what `build-ort.sh` downloads: the ONNX Runtime source, the protobuf source for the host `protoc`, and the dependency archives that ONNX Runtime's CMake fetches. Check those for prebuilt binaries separately, for example by running the build with `ORT_WORK_DIR` set and inspecting that directory.
 - **eSpeak NG source.** `espeak-rs-sys` downloads the espeak-ng tarball pinned in `espeak-ng.lock` during the build. F-Droid allows network access during the build, but a `srclib` for espeak-ng with `ESPEAK_NG_SOURCE` set is cleaner if the reviewers ask.
 - **Screenshots.** Add phone screenshots under `fastlane/metadata/android/en-US/images/phoneScreenshots/` (and `ku/`).
 - **Rustup srclib version.** Check the current `rustup` srclib in fdroiddata and the Rust version dengjen's `rust-toolchain.toml` pins.
