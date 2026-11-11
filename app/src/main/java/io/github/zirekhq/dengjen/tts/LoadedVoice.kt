@@ -1,6 +1,7 @@
 package io.github.zirekhq.dengjen.tts
 
 import io.github.zirekhq.dengjen.android.AudioInfo
+import io.github.zirekhq.dengjen.android.DengjenException
 import io.github.zirekhq.dengjen.android.Voice
 import java.io.File
 
@@ -40,9 +41,17 @@ class LoadedVoice {
         }
     }
 
-    /** Safe from any thread; stops a realtime synthesis and is a no-op otherwise. */
+    /**
+     * Safe from any thread; stops a realtime synthesis and is a no-op otherwise. The binding's
+     * HandleGuard serialises cancel against close and refuses a closed voice, so a cancel that races
+     * [close] never reaches the freed native voice; it only throws, which is ignored here.
+     */
     fun cancel() {
-        speaking?.cancel()
+        try {
+            speaking?.cancel()
+        } catch (e: DengjenException) {
+            // The voice was closed between reading it and cancelling: nothing is left to stop.
+        }
     }
 
     /** Waits for an utterance in progress, so call [cancel] and stop its handler first. */
