@@ -60,6 +60,11 @@ class CatalogueTest {
     }
 
     @Test
+    fun rejectsAVoiceThatIsNotAnObject() {
+        assertThrows(CatalogueException::class.java) { Catalogue.parse("""{"k": 1}""") }
+    }
+
+    @Test
     fun rejectsMalformedJson() {
         assertThrows(CatalogueException::class.java) { Catalogue.parse("{") }
     }

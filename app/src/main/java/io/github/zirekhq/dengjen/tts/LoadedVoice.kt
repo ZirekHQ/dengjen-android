@@ -5,31 +5,39 @@ import io.github.zirekhq.dengjen.android.Voice
 import java.io.File
 
 /**
- * Keeps one voice loaded, so each utterance does not reload the model. Used only from the
- * service's synthesis thread, except [cancel].
+ * Keeps one voice loaded, so each utterance does not reload the model. One lock covers using and
+ * closing the voice, so the native voice is never released while it speaks.
  */
 class LoadedVoice {
+    private val lock = Any()
     private var key: String? = null
     private var voice: Voice? = null
     private var info: AudioInfo? = null
 
-    fun get(key: String, config: File): Pair<Voice, AudioInfo> {
-        val current = voice
-        if (current != null && this.key == key) return current to info!!
-        close()
-        val loaded = Voice.load(config.path)
-        val audio = loaded.audioInfo()
-        voice = loaded
-        info = audio
-        this.key = key
-        return loaded to audio
-    }
-
     @Volatile
     private var speaking: Voice? = null
 
-    fun markSpeaking(voice: Voice?) {
-        speaking = voice
+    /** Runs [block] with the voice for [key], loading it first if another voice is loaded. */
+    fun <T> use(key: String, config: File, block: (Voice, AudioInfo) -> T): T = synchronized(lock) {
+        val current = voice
+        val audio = info
+        val (loaded, loadedInfo) = if (current != null && audio != null && this.key == key) {
+            current to audio
+        } else {
+            closeLocked()
+            val fresh = Voice.load(config.path)
+            val freshInfo = fresh.audioInfo()
+            voice = fresh
+            info = freshInfo
+            this.key = key
+            fresh to freshInfo
+        }
+        speaking = loaded
+        try {
+            block(loaded, loadedInfo)
+        } finally {
+            speaking = null
+        }
     }
 
     /** Safe from any thread; stops a realtime synthesis and is a no-op otherwise. */
@@ -37,7 +45,10 @@ class LoadedVoice {
         speaking?.cancel()
     }
 
-    fun close() {
+    /** Waits for an utterance in progress, so call [cancel] and stop its handler first. */
+    fun close() = synchronized(lock) { closeLocked() }
+
+    private fun closeLocked() {
         voice?.close()
         voice = null
         info = null

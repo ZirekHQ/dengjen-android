@@ -29,6 +29,7 @@ class MainActivity : Activity() {
     private var loadFailed = false
     private var tts: TextToSpeech? = null
     private val previous = mutableMapOf<String, InstallState>()
+    private val rows = linkedMapOf<String, View>()
     private val listener: () -> Unit = { render() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,26 +86,36 @@ class MainActivity : Activity() {
             else -> getString(R.string.status_ready, voices.size, voices.count { it.key in installed })
         }
         if (status.text.toString() != text) status.text = text
-        list.removeAllViews()
+        // Rows are rebuilt only when the voice list changes; progress updates edit them in place so
+        // TalkBack keeps its focus on the control the user is on.
+        if (rows.keys.toList() != voices.map { it.key }) {
+            list.removeAllViews()
+            rows.clear()
+            voices.forEach { voice ->
+                val view = layoutInflater.inflate(R.layout.item_voice, list, false)
+                rows[voice.key] = view
+                list.addView(view)
+            }
+        }
         val defaultKey = repository.defaultVoice()
-        voices.forEach { list.addView(row(it, it.key in installed, it.key == defaultKey)) }
+        voices.forEach { bind(rows.getValue(it.key), it, it.key in installed, it.key == defaultKey) }
     }
 
-    private fun row(voice: CatalogueVoice, installed: Boolean, isDefault: Boolean): View {
-        val view = layoutInflater.inflate(R.layout.item_voice, list, false)
+    private fun bind(view: View, voice: CatalogueVoice, installed: Boolean, isDefault: Boolean) {
         val label = voice.name.replaceFirstChar { it.uppercase() }
-        view.findViewById<TextView>(R.id.voice_name).text = label
-        view.findViewById<TextView>(R.id.voice_detail).text =
-            getString(R.string.voice_detail, voice.quality, Formatter.formatShortFileSize(this, voice.totalBytes))
+        view.findViewById<TextView>(R.id.voice_name).setIfChanged(label)
+        view.findViewById<TextView>(R.id.voice_detail).setIfChanged(
+            getString(R.string.voice_detail, voice.quality, Formatter.formatShortFileSize(this, voice.totalBytes)),
+        )
         val state = repository.state(voice.key)
         announceChange(voice.key, label, state, installed)
-        view.findViewById<TextView>(R.id.voice_state).text = when {
+        view.findViewById<TextView>(R.id.voice_state).setIfChanged(when {
             state is InstallState.Downloading -> getString(R.string.voice_downloading, state.progress.percent)
             state is InstallState.Failed -> getString(R.string.voice_failed, state.reason)
             isDefault -> getString(R.string.voice_default)
             installed -> getString(R.string.voice_installed)
             else -> getString(R.string.voice_not_installed)
-        }
+        })
         val action = view.findViewById<Button>(R.id.voice_action)
         when {
             state is InstallState.Downloading -> action.setup(R.string.cancel, R.string.cancel_named, label) {
@@ -117,7 +128,10 @@ class MainActivity : Activity() {
         makeDefault.visibility = if (installed && !isDefault) View.VISIBLE else View.GONE
         makeDefault.contentDescription = getString(R.string.make_default_named, label)
         makeDefault.setOnClickListener { repository.setDefaultVoice(voice.key) }
-        return view
+    }
+
+    private fun TextView.setIfChanged(value: String) {
+        if (text.toString() != value) text = value
     }
 
     /** Spoken feedback for the end of a download, which a screen reader would otherwise miss. */
@@ -134,8 +148,9 @@ class MainActivity : Activity() {
     }
 
     private fun Button.setup(text: Int, description: Int, label: String, onClick: () -> Unit) {
-        setText(text)
-        contentDescription = getString(description, label)
+        setIfChanged(getString(text))
+        val spoken = getString(description, label)
+        if (contentDescription?.toString() != spoken) contentDescription = spoken
         setOnClickListener { onClick() }
     }
 
@@ -171,6 +186,8 @@ class MainActivity : Activity() {
                 engine?.speak(getString(R.string.sample_text), TextToSpeech.QUEUE_FLUSH, null, SAMPLE_ID)
             } else {
                 status.text = getString(R.string.test_failed)
+                engine?.shutdown()
+                if (tts === engine) tts = null
             }
         }, packageName)
         tts = engine

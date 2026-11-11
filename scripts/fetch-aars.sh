@@ -5,9 +5,11 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 lock="$root/dengjen.lock"
 value() { sed -n "s/^$1=//p" "$lock"; }
 version="$(value version)"
+[ -n "$version" ] || { echo "error: dengjen.lock has no version" >&2; exit 1; }
 mkdir -p "$root/libs"
 for module in core tts; do
   expected="$(value "$module")"
+  [ -n "$expected" ] || { echo "error: dengjen.lock has no $module digest" >&2; exit 1; }
   out="$root/libs/dengjen-android-$module.aar"
   if [ -f "$out" ] && echo "$expected  $out" | sha256sum --check --status; then
     continue

@@ -5,12 +5,13 @@ import android.speech.tts.SynthesisCallback
 import android.speech.tts.SynthesisRequest
 import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeechService
-import android.speech.tts.Voice
 import android.util.Log
+import io.github.zirekhq.dengjen.android.AudioInfo
 import io.github.zirekhq.dengjen.android.DengjenException
 import io.github.zirekhq.dengjen.android.EventType
 import io.github.zirekhq.dengjen.android.SynthesisMode
 import io.github.zirekhq.dengjen.android.SynthesisParams
+import io.github.zirekhq.dengjen.android.Voice
 import io.github.zirekhq.dengjen.voices.VoiceRepository
 
 /** The system TTS engine that TalkBack and other apps call. */
@@ -27,6 +28,8 @@ class DengjenTtsService : TextToSpeechService() {
     }
 
     override fun onDestroy() {
+        stopped = true
+        loaded.cancel()
         loaded.close()
         super.onDestroy()
     }
@@ -39,7 +42,7 @@ class DengjenTtsService : TextToSpeechService() {
     override fun onLoadLanguage(lang: String?, country: String?, variant: String?): Int =
         onIsLanguageAvailable(lang, country, variant)
 
-    override fun onGetVoices(): List<Voice> = voices.installed().map(::systemVoice)
+    override fun onGetVoices(): List<android.speech.tts.Voice> = voices.installed().map(::systemVoice)
 
     override fun onIsValidVoiceName(voiceName: String?): Int =
         if (voiceName != null && voices.store.isInstalled(voiceName)) TextToSpeech.SUCCESS else TextToSpeech.ERROR
@@ -70,8 +73,10 @@ class DengjenTtsService : TextToSpeechService() {
         }
     }
 
-    private fun speak(key: String, request: SynthesisRequest, callback: SynthesisCallback) {
-        val (voice, info) = loaded.get(key, voices.store.configFile(key))
+    private fun speak(key: String, request: SynthesisRequest, callback: SynthesisCallback) =
+        loaded.use(key, voices.store.configFile(key)) { voice, info -> speak(voice, info, request, callback) }
+
+    private fun speak(voice: Voice, info: AudioInfo, request: SynthesisRequest, callback: SynthesisCallback) {
         if (info.sampleWidth() != 2) {
             Log.w(TAG, "unsupported sample width ${info.sampleWidth()}")
             callback.error(TextToSpeech.ERROR_SYNTHESIS)
@@ -93,21 +98,16 @@ class DengjenTtsService : TextToSpeechService() {
             0,
         )
         var failed = false
-        loaded.markSpeaking(voice)
-        try {
-            voice.speak(text, params) { event ->
-                when (event.type()) {
-                    EventType.SPEECH -> !stopped && deliver(event.data(), callback)
-                    EventType.ERROR -> {
-                        Log.w(TAG, "synthesis error", event.error())
-                        failed = true
-                        false
-                    }
-                    else -> !stopped
+        voice.speak(text, params) { event ->
+            when (event.type()) {
+                EventType.SPEECH -> !stopped && deliver(event.data(), callback)
+                EventType.ERROR -> {
+                    Log.w(TAG, "synthesis error", event.error())
+                    failed = true
+                    false
                 }
+                else -> !stopped
             }
-        } finally {
-            loaded.markSpeaking(null)
         }
         // After onStop the framework has already finished the request, so nothing more is reported.
         when {
@@ -131,11 +131,11 @@ class DengjenTtsService : TextToSpeechService() {
         return true
     }
 
-    private fun systemVoice(key: String): Voice = Voice(
+    private fun systemVoice(key: String) = android.speech.tts.Voice(
         key,
         Languages.LOCALE,
-        Voice.QUALITY_HIGH,
-        Voice.LATENCY_NORMAL,
+        android.speech.tts.Voice.QUALITY_HIGH,
+        android.speech.tts.Voice.LATENCY_NORMAL,
         false,
         emptySet(),
     )

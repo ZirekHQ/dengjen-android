@@ -147,11 +147,16 @@ class VoiceRepository private constructor(context: Context) {
         null
     }
 
+    /** Best effort: a failed write keeps the old cache and never discards the fresh catalogue. */
     private fun writeCache(text: String) {
-        cacheFile.parentFile?.mkdirs()
         val tmp = File(cacheFile.path + ".tmp")
-        tmp.writeText(text)
-        tmp.renameTo(cacheFile)
+        try {
+            cacheFile.parentFile?.mkdirs()
+            tmp.writeText(text)
+            if (!tmp.renameTo(cacheFile)) tmp.delete()
+        } catch (e: IOException) {
+            tmp.delete()
+        }
     }
 
     companion object {

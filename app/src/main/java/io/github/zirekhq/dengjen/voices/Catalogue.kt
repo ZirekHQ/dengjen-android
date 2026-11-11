@@ -56,7 +56,10 @@ class Catalogue private constructor(private val voices: Map<String, CatalogueVoi
             } catch (e: JSONException) {
                 throw CatalogueException(e.message ?: "malformed catalogue")
             }
-            val voices = root.keys().asSequence().associateWith { key -> parseVoice(key, root.getJSONObject(key)) }
+            val voices = root.keys().asSequence().associateWith { key ->
+                val json = root.optJSONObject(key) ?: throw CatalogueException("$key is not an object")
+                parseVoice(key, json)
+            }
             val lowered = voices.keys.map { it.lowercase(Locale.ROOT) }
             if (lowered.toSet().size != lowered.size) throw CatalogueException("two voice keys differ only in case")
             return Catalogue(voices)
