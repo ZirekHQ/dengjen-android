@@ -18,16 +18,27 @@ data class CatalogueVoice(
     val files: List<VoiceFile>,
 ) {
     val totalBytes: Long get() = files.sumOf { it.size }
+
+    /** The catalogue name as people read it: `berfin_renas` becomes "Berfin Renas". */
+    val displayName: String
+        get() = name.split('_').filter { it.isNotEmpty() }
+            .joinToString(" ") { part -> part.replaceFirstChar { it.titlecase(Locale.ROOT) } }
+            .ifEmpty { key }
 }
 
 class CatalogueException(message: String) : Exception(message)
 
 /**
- * The Piper `voices.json` catalogue, the same one `dengjen voices install` reads on Linux. Parsing
- * follows the Rust `dengjen-voices` crate: an unsafe path, a missing digest or a name clash rejects
- * the whole catalogue.
+ * The Piper `voices.json` catalogue, the same one `dengjen voices install` reads on Linux. A voice
+ * with an unsafe key or path, a missing digest or a name clash is left out and listed in [skipped],
+ * so one bad entry upstream (or a key this app does not accept, such as a non-ASCII one) cannot hide
+ * every other voice. Only a catalogue that is too big or is not a JSON object is rejected whole.
  */
-class Catalogue private constructor(private val voices: Map<String, CatalogueVoice>) {
+class Catalogue private constructor(
+    private val voices: Map<String, CatalogueVoice>,
+    /** Voices left out, by key, with the reason. */
+    val skipped: Map<String, String>,
+) {
     fun get(key: String): CatalogueVoice? = voices[key]
 
     /** Voices whose language code or family matches, such as `ku` or `ku_TR`. */
@@ -56,19 +67,28 @@ class Catalogue private constructor(private val voices: Map<String, CatalogueVoi
             } catch (e: JSONException) {
                 throw CatalogueException(e.message ?: "malformed catalogue")
             }
-            val voices = root.keys().asSequence().associateWith { key ->
-                val json = root.optJSONObject(key) ?: throw CatalogueException("$key is not an object")
-                parseVoice(key, json)
+            val skipped = LinkedHashMap<String, String>()
+            val parsed = LinkedHashMap<String, CatalogueVoice>()
+            for (key in root.keys()) {
+                try {
+                    val json = root.optJSONObject(key) ?: throw CatalogueException("not an object")
+                    parsed[key] = parseVoice(key, json)
+                } catch (e: CatalogueException) {
+                    skipped[key] = e.message ?: "invalid voice"
+                }
             }
-            val lowered = voices.keys.map { it.lowercase(Locale.ROOT) }
-            if (lowered.toSet().size != lowered.size) throw CatalogueException("two voice keys differ only in case")
-            return Catalogue(voices)
+            // Keys name directories, so two that differ only in case would share one on some file systems.
+            parsed.keys.groupBy { it.lowercase(Locale.ROOT) }.values.filter { it.size > 1 }.flatten().forEach {
+                parsed.remove(it)
+                skipped[it] = "another voice key differs only in case"
+            }
+            return Catalogue(parsed, skipped)
         }
 
         private fun parseVoice(key: String, json: JSONObject): CatalogueVoice = try {
             val inner = json.getString("key")
-            if (inner != key) throw CatalogueException("$key does not match its inner key $inner")
-            if (!KEY.matches(key) || key.contains("..")) throw CatalogueException("unsafe voice key $key")
+            if (inner != key) throw CatalogueException("does not match its inner key $inner")
+            if (!KEY.matches(key) || key.contains("..")) throw CatalogueException("unsafe voice key")
             val language = json.getJSONObject("language")
             val filesJson = json.getJSONObject("files")
             val files = filesJson.keys().asSequence().sorted().map { parseFile(it, filesJson.getJSONObject(it)) }.toList()
@@ -82,7 +102,7 @@ class Catalogue private constructor(private val voices: Map<String, CatalogueVoi
                 files = files,
             )
         } catch (e: JSONException) {
-            throw CatalogueException("$key: ${e.message}")
+            throw CatalogueException(e.message ?: "malformed voice")
         }
 
         private fun parseFile(path: String, json: JSONObject): VoiceFile {
