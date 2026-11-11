@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Dengjen</string>
+    <string name="setup_hint">To use Dengjen with TalkBack, download a voice below, choose Dengjen as the preferred engine in text-to-speech settings, then set the language to Kurdish.</string>
+    <string name="open_tts_settings">Open text-to-speech settings</string>
+    <string name="test_voice">Speak a test sentence</string>
+    <string name="voices_heading">Kurmanji voices</string>
+    <string name="status_loading">Loading the voice list…</string>
+    <string name="status_offline">Could not load the voice list. Check the connection and try again.</string>
+    <string name="status_ready">%1$d voices available, %2$d installed.</string>
+    <string name="retry">Try again</string>
+    <string name="voice_detail">%1$s quality, %2$s</string>
+    <string name="voice_installed">Installed</string>
+    <string name="voice_default">Installed, used by default</string>
+    <string name="voice_not_installed">Not installed</string>
+    <string name="voice_downloading">Downloading, %1$d%%</string>
+    <string name="voice_failed">Download failed: %1$s</string>
+    <string name="install">Download</string>
+    <string name="install_named">Download %1$s</string>
+    <string name="remove">Remove</string>
+    <string name="remove_named">Remove %1$s</string>
+    <string name="cancel">Cancel</string>
+    <string name="cancel_named">Cancel the download of %1$s</string>
+    <string name="make_default">Use by default</string>
+    <string name="make_default_named">Use %1$s by default</string>
+    <string name="download_done">%1$s is installed.</string>
+    <string name="removed">%1$s was removed.</string>
+    <string name="remove_failed">Could not remove %1$s.</string>
+    <string name="test_unavailable">Download a voice first.</string>
+    <string name="test_failed">The test sentence could not be spoken.</string>
+    <string name="sample_text">Silav, ez Dengjen im. Ez bi kurmancî dipeyivim.</string>
+</resources>

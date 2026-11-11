@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="setup_hint">Ji bo ku Dengjenê bi TalkBackê re bi kar bînî, li jêr dengekî daxe, di mîhengên nivîs-bo-axaftinê de Dengjenê wek motora bijartî hilbijêre, paşê zimên bike kurdî.</string>
+    <string name="open_tts_settings">Mîhengên nivîs-bo-axaftinê veke</string>
+    <string name="test_voice">Hevokeke ceribandinê bixwîne</string>
+    <string name="voices_heading">Dengên kurmancî</string>
+    <string name="status_loading">Lîsteya dengan tê barkirin…</string>
+    <string name="status_offline">Lîsteya dengan nehat barkirin. Girêdanê kontrol bike û dîsa biceribîne.</string>
+    <string name="status_ready">%1$d deng hene, %2$d sazkirî ne.</string>
+    <string name="retry">Dîsa biceribîne</string>
+    <string name="voice_detail">Kalîteya %1$s, %2$s</string>
+    <string name="voice_installed">Sazkirî</string>
+    <string name="voice_default">Sazkirî, wek standard tê bikaranîn</string>
+    <string name="voice_not_installed">Nehatiye sazkirin</string>
+    <string name="voice_downloading">Tê daxistin, %1$d%%</string>
+    <string name="voice_failed">Daxistin bi ser neket: %1$s</string>
+    <string name="install">Daxe</string>
+    <string name="install_named">%1$s daxe</string>
+    <string name="remove">Rake</string>
+    <string name="remove_named">%1$s rake</string>
+    <string name="cancel">Betal bike</string>
+    <string name="cancel_named">Daxistina %1$s betal bike</string>
+    <string name="make_default">Wek standard bi kar bîne</string>
+    <string name="make_default_named">%1$s wek standard bi kar bîne</string>
+    <string name="download_done">%1$s hat sazkirin.</string>
+    <string name="removed">%1$s hat rakirin.</string>
+    <string name="remove_failed">%1$s nehat rakirin.</string>
+    <string name="test_unavailable">Pêşî dengekî daxe.</string>
+    <string name="test_failed">Hevoka ceribandinê nehat xwendin.</string>
+    <string name="sample_text">Silav, ez Dengjen im. Ez bi kurmancî dipeyivim.</string>
+</resources>
