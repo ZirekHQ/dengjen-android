@@ -1,0 +1,1 @@
+Kurmanji voices for TalkBack and every app that uses Android text-to-speech.
