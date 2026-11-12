@@ -40,11 +40,14 @@ With Play App Signing, Google holds the app signing key and this is only the upl
 
 ### Google Play
 
-1. Create the Play developer account and the app `io.github.zirekhq.dengjen` (free, all countries).
+1. Create the Play developer account (a one-off fee, plus identity verification) and the app `io.github.zirekhq.dengjen` (free, all countries).
 2. Upload the first bundle by hand to the internal track; Play accepts API uploads only after that. Build it with the release workflow (the `bundle` artifact) or locally with the secrets above as environment variables (`DENGJEN_KEYSTORE` is the path to the `.jks`).
-3. Store listing: use the text in `fastlane/metadata/android/en-US/`. Play offers no Kurdish store-listing language, so the `ku/` text is for F-Droid; on Play, add its first paragraph under the English description if you want Kurmanji readers to see it. The privacy policy URL is `https://github.com/ZirekHQ/dengjen-android/blob/main/PRIVACY.md`.
+3. Store listing: use the text, the 512 px icon, the feature graphic and the phone screenshots in `fastlane/metadata/android/en-US/`. Play offers no Kurdish store-listing language, so the `ku/` text is for F-Droid; on Play, add its first paragraph under the English description if you want Kurmanji readers to see it. The privacy policy URL is `https://github.com/ZirekHQ/dengjen-android/blob/main/PRIVACY.md`.
 4. App content: no ads; data safety "no data collected or shared" (speech stays on the device, the voice download sends nothing but the request); target audience 13+. The app does not use the AccessibilityService API, so no accessibility declaration is needed.
-5. In Google Cloud, create a service account, give it access to the app in the Play Console (Users and permissions, release to testing tracks), create a JSON key and save it as the `PLAY_SERVICE_ACCOUNT_JSON` secret of a `google-play` environment in this repository.
+5. A personal developer account created after November 2023 must run a closed test with at least 12 testers, opted in for 14 days in a row, before it can apply for production access. Use the closed testing track for that, and promote to production once Play grants access.
+6. In Google Cloud, create a service account, give it access to the app in the Play Console (Users and permissions, release to testing tracks), create a JSON key and save it as the `PLAY_SERVICE_ACCOUNT_JSON` secret of a `google-play` environment in this repository.
+
+Play raises the minimum `targetSdk` for new apps and updates every August (API 36 from 31 August 2026); raise `targetSdk` in `app/build.gradle.kts` before then.
 
 The voices are not in the bundle: the app downloads them on first run, so the bundle stays far under Play's size limit.
 
