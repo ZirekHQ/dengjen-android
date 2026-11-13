@@ -13,7 +13,7 @@ Only Kurmanji voices are offered: other languages need eSpeak NG data, which the
 
 ## Building
 
-Prerequisites: JDK 17 and the Android SDK (platform 35).
+Prerequisites: JDK 17 and the Android SDK (platform 36).
 
 ```bash
 scripts/fetch-aars.sh            # the engine AARs from the release pinned in dengjen.lock

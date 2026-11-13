@@ -11,12 +11,12 @@ val missingSigningVars: List<String> =
 
 android {
     namespace = "io.github.zirekhq.dengjen"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "io.github.zirekhq.dengjen"
         // The dengjen AARs need API 27.
         minSdk = 27
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
         // The AARs ship only these ABIs (32-bit ARM is ZirekHQ/dengjen#542).
