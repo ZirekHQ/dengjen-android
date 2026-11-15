@@ -1,5 +1,6 @@
 package io.github.zirekhq.dengjen.tts
 
+import android.app.ActivityManager
 import android.media.AudioFormat
 import android.speech.tts.SynthesisCallback
 import android.speech.tts.SynthesisRequest
@@ -25,6 +26,28 @@ class DengjenTtsService : TextToSpeechService() {
     override fun onCreate() {
         voices = VoiceRepository.get(this)
         super.onCreate()
+        preloadDefaultVoice()
+    }
+
+    /**
+     * Loads the default voice in the background, so the first utterance does not wait about a
+     * second for the model. Low-RAM devices skip it and load on first use, as before, so a
+     * caller that binds only to list voices does not cost them the model's memory.
+     */
+    private fun preloadDefaultVoice() {
+        if (getSystemService(ActivityManager::class.java)?.isLowRamDevice != false) return
+        val thread = Thread({
+            val key = voices.defaultVoice() ?: return@Thread
+            try {
+                loaded.preload(key, voices.store.configFile(key))
+            } catch (e: Exception) {
+                // An uncaught throw on this thread would crash the engine. The first utterance
+                // loads the voice again and reports the failure to its caller.
+                Log.w(TAG, "could not preload $key", e)
+            }
+        }, "dengjen-preload")
+        thread.isDaemon = true
+        thread.start()
     }
 
     override fun onDestroy() {
