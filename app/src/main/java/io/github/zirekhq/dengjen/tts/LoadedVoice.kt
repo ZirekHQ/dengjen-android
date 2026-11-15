@@ -34,12 +34,13 @@ class LoadedVoice {
     }
 
     /**
-     * Loads the voice for [key] ahead of the first utterance, unless it is loaded already or [close]
-     * has run. A [use] that arrives meanwhile waits for this load instead of starting its own.
+     * Loads the voice for [key] ahead of the first utterance, unless [close] has run or a voice is
+     * loaded already: one that a synthesis loaded first is the one in use, so it is kept. A [use]
+     * that arrives meanwhile waits for this load instead of starting its own.
      */
     fun preload(key: String, config: File) {
         synchronized(lock) {
-            if (!closed) loadLocked(key, config)
+            if (!closed && voice == null) loadLocked(key, config)
         }
     }
 
