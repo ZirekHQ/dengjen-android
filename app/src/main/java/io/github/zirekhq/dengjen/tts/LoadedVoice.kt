@@ -18,26 +18,29 @@ class LoadedVoice {
     @Volatile
     private var speaking: Voice? = null
 
+    // Set by close, so a preload that runs after the service is destroyed does not load a voice
+    // nobody will close.
+    private var closed = false
+
     /** Runs [block] with the voice for [key], loading it first if another voice is loaded. */
     fun <T> use(key: String, config: File, block: (Voice, AudioInfo) -> T): T = synchronized(lock) {
-        val current = voice
-        val audio = info
-        val (loaded, loadedInfo) = if (current != null && audio != null && this.key == key) {
-            current to audio
-        } else {
-            closeLocked()
-            val fresh = Voice.load(config.path)
-            val freshInfo = fresh.audioInfo()
-            voice = fresh
-            info = freshInfo
-            this.key = key
-            fresh to freshInfo
-        }
+        val (loaded, loadedInfo) = loadLocked(key, config)
         speaking = loaded
         try {
             block(loaded, loadedInfo)
         } finally {
             speaking = null
+        }
+    }
+
+    /**
+     * Loads the voice for [key] ahead of the first utterance, unless [close] has run or a voice is
+     * loaded already: one that a synthesis loaded first is the one in use, so it is kept. A [use]
+     * that arrives meanwhile waits for this load instead of starting its own.
+     */
+    fun preload(key: String, config: File) {
+        synchronized(lock) {
+            if (!closed && voice == null) loadLocked(key, config)
         }
     }
 
@@ -55,7 +58,23 @@ class LoadedVoice {
     }
 
     /** Waits for an utterance in progress, so call [cancel] and stop its handler first. */
-    fun close() = synchronized(lock) { closeLocked() }
+    fun close() = synchronized(lock) {
+        closed = true
+        closeLocked()
+    }
+
+    private fun loadLocked(key: String, config: File): Pair<Voice, AudioInfo> {
+        val current = voice
+        val audio = info
+        if (current != null && audio != null && this.key == key) return current to audio
+        closeLocked()
+        val fresh = Voice.load(config.path)
+        val freshInfo = fresh.audioInfo()
+        voice = fresh
+        info = freshInfo
+        this.key = key
+        return fresh to freshInfo
+    }
 
     private fun closeLocked() {
         voice?.close()
